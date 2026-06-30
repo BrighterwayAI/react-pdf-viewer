@@ -14,7 +14,6 @@ import {
     rollup,
     type OutputOptions,
     type RollupOptions,
-    type RollupOutput,
     type WarningHandlerWithDefault,
 } from 'rollup';
 import copy from 'rollup-plugin-copy';
@@ -147,19 +146,14 @@ const buildPackage = async (rootPackagePath: string) => {
 
     // Compile
     return Promise.all(
-        rollupOptions.map((rollupOption) => {
-            new Promise<RollupOutput>((resolveBuild) => {
-                rollup(rollupOption).then((build) => {
-                    build.write(rollupOption.output as OutputOptions).then((out) => {
-                        resolveBuild(out);
-                    });
-                });
-            });
+        rollupOptions.map(async (rollupOption) => {
+            const build = await rollup(rollupOption);
+            return build.write(rollupOption.output as OutputOptions);
         }),
     );
 };
 
 (async () => {
     const rootPackagePath = process.cwd();
-    buildPackage(rootPackagePath);
+    await buildPackage(rootPackagePath);
 })();
