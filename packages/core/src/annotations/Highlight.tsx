@@ -30,7 +30,25 @@ export const Highlight: React.FC<{
 
     // Check if the highlight area is constructed by multiple quadrilaterals
     if (annotation.quadPoints && annotation.quadPoints.length > 0) {
-        const annotations = annotation.quadPoints.map(
+        // pdfjs-dist v4 returns quadPoints as a flat Float32Array
+        // v3 returned AnnotationPoint[][]
+        const raw = annotation.quadPoints as unknown as number[] | PdfJs.AnnotationPoint[][];
+        const isFlat = typeof raw[0] === 'number';
+
+        const quads: PdfJs.AnnotationPoint[][] = isFlat
+            ? Array.from({ length: (raw as number[]).length / 8 }, (_, i) => {
+                  const o = i * 8;
+                  const flat = raw as number[];
+                  return [
+                      { x: flat[o], y: flat[o + 1] },
+                      { x: flat[o + 2], y: flat[o + 3] },
+                      { x: flat[o + 4], y: flat[o + 5] },
+                      { x: flat[o + 6], y: flat[o + 7] },
+                  ];
+              })
+            : (raw as PdfJs.AnnotationPoint[][]);
+
+        const annotations = quads.map(
             (quadPoint) =>
                 Object.assign({}, annotation, {
                     rect: [quadPoint[2].x, quadPoint[2].y, quadPoint[1].x, quadPoint[1].y],
