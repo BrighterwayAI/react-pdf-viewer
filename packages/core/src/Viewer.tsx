@@ -14,7 +14,7 @@ import { usePrevious } from './hooks/usePrevious';
 import { Inner } from './layouts/Inner';
 import { PageSizeCalculator } from './layouts/PageSizeCalculator';
 import { DocumentLoader, RenderError } from './loader/DocumentLoader';
-import { StackContext } from './portal/StackContext';
+import { StackProvider } from './portal/StackProvider';
 import { BreakpointContext } from './responsive/BreakpointContext';
 import { useBreakpoint } from './responsive/useBreakpoint';
 import { FullScreenMode } from './structs/FullScreenMode';
@@ -175,10 +175,6 @@ export const Viewer: React.FC<{
     const { currentTheme } = React.useContext(ThemeContext);
     const prevTheme = usePrevious(currentTheme);
 
-    const [numStacks, setNumStacks] = React.useState(0);
-    const increaseNumStacks = () => setNumStacks((v) => v + 1);
-    const decreaseNumStacks = () => setNumStacks((v) => v - 1);
-
     React.useEffect(() => {
         if (currentTheme !== prevTheme && onSwitchTheme) {
             onSwitchTheme(currentTheme);
@@ -186,7 +182,7 @@ export const Viewer: React.FC<{
     }, [currentTheme]);
 
     return (
-        <StackContext.Provider value={{ currentIndex: 0, increaseNumStacks, decreaseNumStacks, numStacks }}>
+        <StackProvider>
             <BreakpointContext.Provider value={breakpoint}>
                 <div
                     ref={containerRef}
@@ -259,6 +255,6 @@ export const Viewer: React.FC<{
                     )}
                 </div>
             </BreakpointContext.Provider>
-        </StackContext.Provider>
+        </StackProvider>
     );
 };
