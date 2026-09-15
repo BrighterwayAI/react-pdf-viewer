@@ -10,6 +10,7 @@
 
 import * as React from 'react';
 import { DefaultLocalization, LocalizationContext } from './localization/LocalizationContext';
+import { StackProvider } from './portal/StackProvider';
 import { TextDirection, ThemeContext, ThemeContextProps } from './theme/ThemeContext';
 import { withTheme } from './theme/withTheme';
 import { type LocalizationMap } from './types/LocalizationMap';
@@ -87,7 +88,10 @@ export const Provider: React.FC<{
     return (
         <PdfJsApiContext.Provider value={{ pdfJsApiProvider: pdfApiProvider }}>
             <LocalizationContext.Provider value={localizationContext}>
-                <ThemeContext.Provider value={themeContext}>{children}</ThemeContext.Provider>
+                <ThemeContext.Provider value={themeContext}>
+                    {/* Popovers, tooltips and modals rendered outside of a `Viewer` (a toolbar, for example) need a stack too */}
+                    <StackProvider>{children}</StackProvider>
+                </ThemeContext.Provider>
             </LocalizationContext.Provider>
         </PdfJsApiContext.Provider>
     );
