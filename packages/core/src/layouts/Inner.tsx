@@ -292,6 +292,16 @@ export const Inner: React.FC<{
         [],
     );
 
+    // Jump to the initial page only after the measured page sizes have been applied to the
+    // virtualizer. Jumping from inside the page-size promise scrolls against the estimated
+    // sizes (every page assumed to match the first one), which lands on the wrong page
+    // whenever the document mixes page sizes.
+    React.useEffect(() => {
+        if (areSizesCalculated && initialPage !== 0) {
+            jumpToPage(initialPage);
+        }
+    }, [areSizesCalculated]);
+
     const jumpToPreviousPage = React.useCallback(
         () => virtualizer.scrollToPreviousItem(stateRef.current.pageIndex, ZERO_OFFSET),
         [],
@@ -492,11 +502,7 @@ export const Inner: React.FC<{
             Promise.all(queryPageSizes).then((pageSizes) => {
                 setSizesCalculated(true);
                 setPageSizes(pageSizes);
-                if (initialPage !== 0) {
-                    // Don't render the surrounded pages of the first page
-                    // Jump to the initial page
-                    jumpToPage(initialPage);
-                }
+                // The jump to `initialPage` happens in an effect once these sizes are applied
             });
         },
         [areSizesCalculated],
